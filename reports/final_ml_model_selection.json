@@ -1,0 +1,36 @@
+{
+    "project": "Industrial Predictive Maintenance AI",
+    "primary_model": "Random Forest",
+    "challenger_model": "XGBoost",
+    "baseline_model": "Linear Regression",
+    "selection_reason": [
+        "Lowest PHM08 score on official NASA Test among the three evaluated models.",
+        "Lowest RMSE on official NASA Test.",
+        "Highest R2 on official NASA Test."
+    ],
+    "official_test_metrics": {
+        "Random Forest": {
+            "MAE": 12.7535,
+            "RMSE": 17.513,
+            "R2": 0.8224,
+            "PHM08_Total_Score": 720.4138
+        },
+        "XGBoost": {
+            "MAE": 12.5057,
+            "RMSE": 17.7183,
+            "R2": 0.8182,
+            "PHM08_Total_Score": 818.058
+        },
+        "Linear Regression": {
+            "MAE": 17.6182,
+            "RMSE": 21.8754,
+            "R2": 0.7229,
+            "PHM08_Total_Score": 1307.551
+        }
+    },
+    "limitations": [
+        "Model selection is retrospective because the official Test set was used for model comparison.",
+        "The dataset is NASA C-MAPSS simulated turbofan data.",
+        "The selected model is a portfolio research model, not a certified industrial safety system."
+    ]
+}

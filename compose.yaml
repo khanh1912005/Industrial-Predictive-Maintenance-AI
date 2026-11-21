@@ -1,0 +1,95 @@
+
+services:
+
+  # ========================================
+  # 1. FASTAPI BACKEND
+  # ========================================
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+
+    image: predictive-api:0.1.0
+
+    ports:
+      - "127.0.0.1:8000:8000"
+
+    restart: unless-stopped
+
+    init: true
+
+    stop_grace_period: 20s
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json, urllib.request; r = urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3); d = json.load(r); assert d.get('model_loaded') is True"
+
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+
+  # ========================================
+  # 2. STREAMLIT DASHBOARD
+  # ========================================
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+
+    image: predictive-dashboard:0.1.0
+
+    ports:
+      - "127.0.0.1:8501:8501"
+
+    environment:
+      API_BASE_URL: "http://api:8000"
+
+    volumes:
+      - ./data/raw/cmapss:/app/data/raw/cmapss:ro
+
+    restart: unless-stopped
+
+    init: true
+
+    stop_grace_period: 20s
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    depends_on:
+      api:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"
+
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

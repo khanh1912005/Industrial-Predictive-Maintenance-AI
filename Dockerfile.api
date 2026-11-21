@@ -1,0 +1,99 @@
+
+# ==========================================
+# 1. BASE IMAGE
+# ==========================================
+
+FROM python:3.13-slim
+
+
+# ==========================================
+# 2. PYTHON ENVIRONMENT
+# ==========================================
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+
+# ==========================================
+# 3. WORKING DIRECTORY
+# ==========================================
+
+WORKDIR /app
+
+
+# ==========================================
+# 4. INSTALL SYSTEM DEPENDENCIES
+# ==========================================
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# ==========================================
+# 5. COPY REQUIREMENTS
+# ==========================================
+
+COPY requirements-production.txt ./
+
+
+# ==========================================
+# 6. INSTALL CPU-ONLY PYTORCH
+# ==========================================
+
+RUN python -m pip install --no-cache-dir \
+    torch==2.15.0 \
+    --index-url https://download.pytorch.org/whl/cpu
+
+
+# ==========================================
+# 7. INSTALL REMAINING DEPENDENCIES
+# ==========================================
+
+RUN python -m pip install --no-cache-dir \
+    -r requirements-production.txt
+
+
+# ==========================================
+# 8. CREATE NON-ROOT USER
+# ==========================================
+
+RUN groupadd --system app \
+    && useradd --system --gid app --create-home app
+
+
+# ==========================================
+# 9. COPY APPLICATION SOURCE CODE
+# ==========================================
+
+COPY --chown=app:app src/ ./src/
+
+
+# ==========================================
+# 10. COPY FINAL MODEL PACKAGE
+# ==========================================
+
+COPY --chown=app:app \
+    artifacts/final_dl_model/ \
+    ./artifacts/final_dl_model/
+
+
+# ==========================================
+# 11. USE NON-ROOT USER
+# ==========================================
+
+USER app
+
+
+# ==========================================
+# 12. EXPOSE API PORT
+# ==========================================
+
+EXPOSE 8000
+
+
+# ==========================================
+# 13. START FASTAPI
+# ==========================================
+
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

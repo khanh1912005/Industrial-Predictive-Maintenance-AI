@@ -1,0 +1,46 @@
+
+# Python environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# IDE
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+logs/
+*.tmp
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Dataset
+data/raw/
+data/interim/
+data/processed/
+
+# Intermediate model artifacts
+artifacts/*
+
+# Keep final inference package
+!artifacts/final_dl_model/
+artifacts/final_dl_model/*
+!artifacts/final_dl_model/lstm.pt
+!artifacts/final_dl_model/standard_scaler.joblib
+!artifacts/final_dl_model/feature_metadata.json
+!artifacts/final_dl_model/model_config.json
